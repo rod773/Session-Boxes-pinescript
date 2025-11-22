@@ -1,0 +1,158 @@
+//@version=6
+indicator('Session Boxes (Asia, London, NY) — Custom Timezone', overlay = true)
+
+//-----------------------------
+// Inputs
+//-----------------------------
+asiaSess   = input.session('0100-0900', 'Asia session (local time)')
+asiaColor  = input.color(color.yellow, 'Asia color')
+
+lonSess    = input.session('0800-1700', 'London session (local time)')
+lonColor   = input.color(color.blue, 'London color')
+
+nySess     = input.session('1400-2200', 'New York session (local time)')
+nyColor    = input.color(color.purple, 'New York color')
+
+boxTransp  = input.int(85, 'Box transparency (0-100)')
+lineStyle  = input.string('solid', 'Vertical line style', options = ['solid', 'dashed', 'dotted'])
+
+// Timezone selector
+tzChoice   = input.string('Europe/Madrid', 'Timezone', options = ['Europe/Madrid', 'Europe/London', 'Asia/Tokyo', 'America/New_York'])
+
+//-----------------------------
+// Style resolver
+//-----------------------------
+styleFromStr(str) =>
+    str == 'dashed' ? line.style_dashed : str == 'dotted' ? line.style_dotted : line.style_solid
+
+ls = styleFromStr(lineStyle)
+
+//-----------------------------
+// Session helpers (use selected timezone)
+//-----------------------------
+inSession(sess) =>
+    not na(time(timeframe.period, sess + ':1234567', tzChoice))
+
+entered(cond) =>
+    cond and not cond[1]
+
+exited(cond) =>
+    not cond and cond[1]
+
+//-----------------------------
+// Storage
+//-----------------------------
+var float asiaHigh = na
+var float asiaLow  = na
+var int   asiaStart = na
+var box   asiaBox = na
+
+var float lonHigh  = na
+var float lonLow   = na
+var int   lonStart = na
+var box   lonBox = na
+
+var float nyHigh   = na
+var float nyLow    = na
+var int   nyStart  = na
+var box   nyBox = na
+
+//-----------------------------
+// Asia
+//-----------------------------
+asiaIn = inSession(asiaSess)
+
+if entered(asiaIn)
+    asiaHigh  := high
+    asiaLow   := low
+    asiaStart := bar_index
+    asiaBox   := box.new(asiaStart, asiaHigh, bar_index, asiaLow,
+                         xloc = xloc.bar_index, border_color = asiaColor,
+                         bgcolor = color.new(asiaColor, boxTransp))
+    line.new(bar_index, close, bar_index, close, xloc = xloc.bar_index,
+             extend = extend.none, color = asiaColor, width = 1, style = ls)
+
+if asiaIn and not na(asiaBox)
+    asiaHigh := math.max(asiaHigh, high)
+    asiaLow  := math.min(asiaLow, low)
+    box.set_top(asiaBox, asiaHigh)
+    box.set_bottom(asiaBox, asiaLow)
+    box.set_right(asiaBox, bar_index)
+
+if exited(asiaIn) and not na(asiaBox)
+    line.new(bar_index, close, bar_index, close, xloc = xloc.bar_index,
+             extend = extend.none, color = asiaColor, width = 1, style = ls)
+    float midY = (asiaHigh + asiaLow) / 2.0
+    int midX   = int(math.round((asiaStart + bar_index) / 2.0))
+    label.new(midX, midY, 'ASIA', style = label.style_label_center,
+              color = color.new(color.white, 100), textcolor = asiaColor, size = size.large)
+    asiaHigh  := na
+    asiaLow   := na
+    asiaStart := na
+    asiaBox   := na
+
+//-----------------------------
+// London
+//-----------------------------
+londonIn = inSession(lonSess)
+
+if entered(londonIn)
+    lonHigh  := high
+    lonLow   := low
+    lonStart := bar_index
+    lonBox   := box.new(lonStart, lonHigh, bar_index, lonLow, xloc = xloc.bar_index, border_color = lonColor, bgcolor = color.new(lonColor, boxTransp))
+    line.new(bar_index, close, bar_index, close, xloc = xloc.bar_index,
+             extend = extend.none, color = lonColor, width = 1, style = ls)
+
+if londonIn and not na(lonBox)
+    lonHigh := math.max(lonHigh, high)
+    lonLow  := math.min(lonLow, low)
+    box.set_top(lonBox, lonHigh)
+    box.set_bottom(lonBox, lonLow)
+    box.set_right(lonBox, bar_index)
+
+if exited(londonIn) and not na(lonBox)
+    line.new(bar_index, close, bar_index, close, xloc = xloc.bar_index,
+             extend = extend.none, color = lonColor, width = 1, style = ls)
+    float midY = (lonHigh + lonLow) / 2.0
+    int midX   = int(math.round((lonStart + bar_index) / 2.0))
+    label.new(midX, midY, 'LONDON', style = label.style_label_center,
+              color = color.new(color.white, 100), textcolor = lonColor, size = size.large)
+    lonHigh  := na
+    lonLow   := na
+    lonStart := na
+    lonBox   := na
+
+//-----------------------------
+// New York
+//-----------------------------
+nyIn = inSession(nySess)
+
+if entered(nyIn)
+    nyHigh  := high
+    nyLow   := low
+    nyStart := bar_index
+    nyBox   := box.new(nyStart, nyHigh, bar_index, nyLow,
+                       xloc = xloc.bar_index, border_color = nyColor,
+                       bgcolor = color.new(nyColor, boxTransp))
+    line.new(bar_index, close, bar_index, close, xloc = xloc.bar_index,
+             extend = extend.none, color = nyColor, width = 1, style = ls)
+
+if nyIn and not na(nyBox)
+    nyHigh := math.max(nyHigh, high)
+    nyLow  := math.min(nyLow, low)
+    box.set_top(nyBox, nyHigh)
+    box.set_bottom(nyBox, nyLow)
+    box.set_right(nyBox, bar_index)
+
+if exited(nyIn) and not na(nyBox)
+    line.new(bar_index, close, bar_index, close, xloc = xloc.bar_index,
+             extend = extend.none, color = nyColor, width = 1, style = ls)
+    float midY = (nyHigh + nyLow) / 2.0
+    int midX   = int(math.round((nyStart + bar_index) / 2.0))
+    label.new(midX, midY, 'NEW YORK', style = label.style_label_center,
+              color = color.new(color.white, 100), textcolor = nyColor, size = size.large)
+    nyHigh  := na
+    nyLow   := na
+    nyStart := na
+    nyBox   := na
