@@ -1,1 +1,2 @@
-<img width="1494" height="661" alt="BTCUSD_2025-11-22_19-40-02_81b31" src="https://github.com/user-attachments/assets/8bfb7e77-4c98-41d4-b159-48142d9ac7ed" />
+
+<img width="1789" height="869" alt="ETHUSD_2025-12-09_21-38-20_5b636" src="https://github.com/user-attachments/assets/c643169f-b148-4d8c-82c1-20e7ed4f895f" />
